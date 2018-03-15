@@ -34,7 +34,7 @@ namespace nluckett {
 
 		void record(std::vector<u32> &data);
 
-		u32 playback(std::vector<u32> &data);
+		void playback(std::vector<u32> &data);
 
 		void mute(void);
 

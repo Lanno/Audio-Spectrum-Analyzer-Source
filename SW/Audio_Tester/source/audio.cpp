@@ -6,6 +6,7 @@
  */
 
 #include <audio.hpp>
+#include <chrono>
 
 #define CORE_CLOCK_FREQ 100000000
 #define SAMPLE_RATE         48000
@@ -64,29 +65,14 @@ namespace nluckett {
 
 		logii2s_port_enable_xfer(&i2s_rx);
 
-		while((logii2s_port_get_isr(&i2s_rx) & LOGII2S_INT_FAF) != LOGII2S_INT_FAF);
-
-		u32 samples[150];
-
-		logii2s_port_read_fifo(&i2s_rx, samples, 150);
-
-		for(u32 idx = 0; idx < 150; idx++)
-			data.push_back(samples[idx]);
-
     }
 
-    u32 Audio::playback(std::vector<u32> &data) {
-        logii2s_port_write_fifo(&i2s_tx, data.data(), data.size());
+    void Audio::playback(std::vector<u32> &data) {
+		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
 
-        logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
+		logii2s_port_unmask_int(&i2s_tx, LOGII2S_INT_FAE);
 
-        logii2s_port_unmask_int(&i2s_tx, LOGII2S_INT_FAE);
-
-        logii2s_port_enable_xfer(&i2s_tx);
-
-        while((logii2s_port_get_isr(&i2s_tx) & LOGII2S_INT_FAE) != LOGII2S_INT_FAE);
-
-        return 0;
+		logii2s_port_enable_xfer(&i2s_tx);
     }
 
     void Audio::mute(void) {

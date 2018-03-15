@@ -35,39 +35,31 @@ int main() {
     if(status != XST_SUCCESS) throw("The Mute GPIO could not be initialized.");
 
     while(true) {
-    	std::vector<u32> rec_data;
+    	std::vector<u32> data;
 
     	u32 buttons_state = XGpio_DiscreteRead(&buttons, 1);
 
     	if(buttons_state != 0) {
     		std::cout << "Recording audio data." << std::endl;
 
-    		while(buttons_state != 0) {
-    		    buttons_state = XGpio_DiscreteRead(&buttons, 1);
+    		for(u32 rec_counter = 0; rec_counter < 2000; rec_counter++) {
+    		    //buttons_state = XGpio_DiscreteRead(&buttons, 1);
 
-    		    audio.record(rec_data);
+    		    audio.record(data);
     		}
 
-    		std::cout << "Recorded " << rec_data.size() << " samples." << std::endl;
+    		std::cout << "Recorded " << data.size() << " samples." << std::endl;
 
     	}
 
     	buttons_state = XGpio_DiscreteRead(&buttons, 1);
 
-    	if(buttons_state == 0) {
-    		while(rec_data.size() >= 500) {
-				std::vector<u32> pbl_data;
+    	if(buttons_state == 0 && data.size() > 0) {
+    		std::cout << "Playing back audio data." << std::endl;
 
-				for(u32 idx = 0; idx < 500; idx++) {
-					pbl_data.push_back(rec_data.back());
+			audio.playback(data);
 
-					rec_data.pop_back();
-				}
-
-				std::reverse(pbl_data.begin(), pbl_data.end());
-
-				audio.playback(pbl_data);
-    		}
+			std::cout << "Play back complete. " << data.size() << " samples remain in the buffer." <<  std::endl;
     	}
     }
 
