@@ -7,11 +7,6 @@
 
 #include <audio.hpp>
 
-#include <xparameters.h>
-#include <xgpio.h>
-#include <xscugic.h>
-#include <xil_exception.h>
-
 #define CORE_CLOCK_FREQ 100000000
 #define SAMPLE_RATE         48000
 

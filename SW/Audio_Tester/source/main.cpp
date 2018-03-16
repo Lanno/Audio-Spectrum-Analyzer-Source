@@ -10,15 +10,13 @@
 
 #include <iostream>
 #include <vector>
-#include <cstdlib>
-#include <algorithm>
 
 #include <xparameters.h>
 #include <xgpio.h>
 #include <xscugic.h>
 #include <xil_exception.h>
 
-#include <audio.hpp>
+//#include <audio.hpp>
 
 #define BUTTONS_INTERRUPT 1
 
@@ -55,13 +53,16 @@ void button_handler(void *InstancePtr) {
 void init_gpio(void) {
 	// Setup the buttons with their interrupts
 
-	XGpio BUTTONS;
+	XGpio buttons;
 
-	int status = XGpio_Initialize(&BUTTONS, XPAR_BUTTONS_DEVICE_ID);
+	int status = XGpio_Initialize(&buttons, XPAR_BUTTONS_DEVICE_ID);
 
-	if(status != XST_SUCCESS) throw std::runtime_error("The Mute GPIO could not be initialized.");
+	if(status != XST_SUCCESS) throw std::runtime_error("The button GPIO could not be initialized.");
+
+	XGpio_SetDataDirection(&buttons, 1, 0xF);
 
 	// Interrupt controller initialization
+
 	XScuGic gic;
 
 	XScuGic_Config *gic_config;
@@ -70,7 +71,13 @@ void init_gpio(void) {
 
 	status = XScuGic_CfgInitialize(&gic, gic_config, gic_config->CpuBaseAddress);
 
-	if(status != XST_SUCCESS) throw std::runtime_error("The Mute GPIO could not be initialized.");
+	if(status != XST_SUCCESS) throw std::runtime_error("The GIC could not be initialized.");
+
+	// Enable GPIO interrupts interrupt
+
+	XGpio_InterruptEnable(&buttons, BUTTONS_INTERRUPT);
+
+	XGpio_InterruptGlobalEnable(&buttons);
 
 	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
 								(Xil_ExceptionHandler) XScuGic_InterruptHandler,
@@ -79,31 +86,34 @@ void init_gpio(void) {
 	Xil_ExceptionEnable();
 
 	// Connect GPIO interrupt to handler
+
 	status = XScuGic_Connect(&gic,
 							 XPAR_FABRIC_BUTTONS_IP2INTC_IRPT_INTR,
 							 (Xil_ExceptionHandler) button_handler,
-							 (void *) &BUTTONS);
+							 (void*) &buttons);
 
 	if(status != XST_SUCCESS) throw std::runtime_error("The Mute GPIO could not be initialized.");
 
-	// Enable GPIO interrupts interrupt
-	XGpio_InterruptEnable(&BUTTONS, BUTTONS_INTERRUPT);
-
-	XGpio_InterruptGlobalEnable(&BUTTONS);
-
 	// Enable GPIO interrupts in the controller
+
+	XGpio_InterruptClear(&buttons, BUTTONS_INTERRUPT);
+
+	XGpio_InterruptEnable(&buttons, BUTTONS_INTERRUPT);
+
+	XGpio_InterruptGlobalEnable(&buttons);
+
 	XScuGic_Enable(&gic, XPAR_FABRIC_BUTTONS_IP2INTC_IRPT_INTR);
 }
 
 
 int main() {
-    std::cout << "Beginning audio program..." << std::endl;
-
-    nluckett::Audio audio;
-
-    std::cout << "I2S Initialization Complete." << std::endl;
-
-    audio.unmute();
+//    std::cout << "Beginning audio program..." << std::endl;
+//
+//    nluckett::Audio audio;
+//
+//    std::cout << "I2S Initialization Complete." << std::endl;
+//
+//    audio.unmute();
 
     std::cout << "Initializing GPIO with interrupts." << std::endl;
 
@@ -114,13 +124,13 @@ int main() {
     while(true) {}
 //    	std::vector<u32> data;
 //
-//    	u32 buttons_state = XGpio_DiscreteRead(&BUTTONS, 1);
+//    	u32 buttons_state = XGpio_DiscreteRead(&buttons, 1);
 //
 //    	if(buttons_state != 0) {
 //    		std::cout << "Recording audio data." << std::endl;
 //
 //    		for(u32 rec_counter = 0; rec_counter < 2000; rec_counter++) {
-//    		    //buttons_state = XGpio_DiscreteRead(&BUTTONS, 1);
+//    		    //buttons_state = XGpio_DiscreteRead(&buttons, 1);
 //
 //    		    audio.record(data);
 //    		}
@@ -129,7 +139,7 @@ int main() {
 //
 //    	}
 //
-//    	buttons_state = XGpio_DiscreteRead(&BUTTONS, 1);
+//    	buttons_state = XGpio_DiscreteRead(&buttons, 1);
 //
 //    	if(buttons_state == 0 && data.size() > 0) {
 //    		std::cout << "Playing back audio data." << std::endl;

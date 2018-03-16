@@ -14,6 +14,8 @@
 
 #include <xparameters.h>
 #include <xgpio.h>
+#include <xscugic.h>
+#include <xil_exception.h>
 
 #include <logii2s.h>
 #include <i2c.h>
