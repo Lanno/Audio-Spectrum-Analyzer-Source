@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stdexcept>
 
 #include <xparameters.h>
 #include <xgpio.h>

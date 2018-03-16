@@ -37,9 +37,9 @@ namespace nluckett {
         u32 actual_fs_0 = logii2s_port_init_clock(&i2s_tx, CORE_CLOCK_FREQ, SAMPLE_RATE);
         u32 actual_fs_1 = logii2s_port_init_clock(&i2s_rx, CORE_CLOCK_FREQ, SAMPLE_RATE);
 
-        if(actual_fs_0 == 0) throw("Instance 0's control register is not configured to be a clock and word select master.");
+        if(actual_fs_0 == 0) throw std::runtime_error("Instance 0's control register is not configured to be a clock and word select master.");
 
-        if(actual_fs_1 == 0) throw("Instance 1's control register is not configured to be a clock and word select master.");
+        if(actual_fs_1 == 0) throw std::runtime_error("Instance 1's control register is not configured to be a clock and word select master.");
 
         std::cout << "The requested sampling rate is: "       << SAMPLE_RATE << std::endl;
         std::cout << "Instance 0's actual sampling rate is: " << actual_fs_0 << std::endl;
@@ -49,7 +49,7 @@ namespace nluckett {
 
         int status = XGpio_Initialize(mute_ptr, XPAR_MUTE_DEVICE_ID);
 
-        if(status != XST_SUCCESS) throw("The Mute GPIO could not be initialized.");
+        if(status != XST_SUCCESS) throw std::runtime_error("The Mute GPIO could not be initialized.");
 
         // I2C Stuff
 
