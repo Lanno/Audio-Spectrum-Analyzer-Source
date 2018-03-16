@@ -43,4 +43,6 @@ namespace nluckett {
 	};
 }
 
+//void init_audio_interrupts(void);
+
 #endif /* INCLUDE_AUDIO_HPP_ */

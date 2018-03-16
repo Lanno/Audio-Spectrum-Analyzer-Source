@@ -6,7 +6,11 @@
  */
 
 #include <audio.hpp>
-#include <chrono>
+
+#include <xparameters.h>
+#include <xgpio.h>
+#include <xscugic.h>
+#include <xil_exception.h>
 
 #define CORE_CLOCK_FREQ 100000000
 #define SAMPLE_RATE         48000
@@ -84,6 +88,44 @@ namespace nluckett {
     }
 }
 
+//void audio_interrupt_handler(void *InstancePtr) {
+//
+//}
+//
+//void init_audio_interrupts(void) {
+//	// Interrupt controller initialization
+//	XScuGic gic;
+//
+//	XScuGic_Config *gic_config;
+//
+//	gic_config = XScuGic_LookupConfig(XPAR_PS7_SCUGIC_0_DEVICE_ID);
+//
+//	int status = XScuGic_CfgInitialize(&gic, gic_config, gic_config->CpuBaseAddress);
+//
+//	if(status != XST_SUCCESS) throw std::runtime_error("The Mute GPIO could not be initialized.");
+//
+//	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
+//								(Xil_ExceptionHandler) XScuGic_InterruptHandler,
+//								 &gic);
+//
+//	Xil_ExceptionEnable();
+//
+//	// Connect device interrupt to handler
+//	status = XScuGic_Connect(&gic,
+//							 XPAR_FABRIC_LOGII2S_INTERRUPT_INTR,
+//							 (Xil_ExceptionHandler) audio_interrupt_handler,
+//							 (void *) &BUTTONS);
+//
+//	if(status != XST_SUCCESS) throw std::runtime_error("The Mute GPIO could not be initialized.");
+//
+//	// Enable GPIO interrupts interrupt
+//	XGpio_InterruptEnable(&BUTTONS, BUTTONS_INTERRUPT);
+//
+//	XGpio_InterruptGlobalEnable(&BUTTONS);
+//
+//	// Enable GPIO interrupts in the controller
+//	XScuGic_Enable(&gic, XPAR_FABRIC_BUTTONS_IP2INTC_IRPT_INTR);
+//}
 
 
 
