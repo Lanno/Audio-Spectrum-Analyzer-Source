@@ -148,16 +148,20 @@ namespace nluckett {
 		Audio* audio = (Audio*)audio_instance;
 
 		if(audio->recording_enabled()) {
+			std::cout << "R";
+
 			audio->record();
 
 		} else if(audio->playback_enabled()) {
+			std::cout << "P";
+
 			audio->playback();
 
 		}
 
 	}
 
-	void init_audio_interrupts(void) {
+	void init_audio_interrupts(Audio& audio_instance) {
 		// Interrupt controller initialization
 		static XScuGic gic;
 
@@ -175,13 +179,11 @@ namespace nluckett {
 
 		Xil_ExceptionEnable();
 
-		static u32 dummy;
-
 		// Connect device interrupt to handler
 		status = XScuGic_Connect(&gic,
 								 XPAR_FABRIC_LOGII2S_INTERRUPT_INTR,
 								 (Xil_ExceptionHandler) audio_handler,
-								 (void*) &dummy);
+								 (void*) &audio_instance);
 
 		if(status != XST_SUCCESS) throw std::runtime_error("The audio_handler could not be connected.");
 

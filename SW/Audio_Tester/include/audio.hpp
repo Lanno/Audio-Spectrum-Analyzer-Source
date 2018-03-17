@@ -66,8 +66,9 @@ namespace nluckett {
 		logii2s_port get_rx(void);
 
 	};
-}
 
-//void init_audio_interrupts(void);
+	void audio_handler(void *audio_instance);
+	void init_audio_interrupts(Audio& audio_instance);
+}
 
 #endif /* INCLUDE_AUDIO_HPP_ */

@@ -111,15 +111,17 @@ int main() {
 
     nluckett::Audio audio;
 
-    std::cout << "I2S Initialization Complete." << std::endl;
+    std::cout << "I2S initialization complete." << std::endl;
 
     audio.unmute();
-
-    std::cout << "Initializing GPIO with interrupts." << std::endl;
 
     init_gpio();
 
     std::cout << "GPIO initialization complete." << std::endl;
+
+    init_audio_interrupts(audio);
+
+    std::cout << "Audio interrupt initialization complete." << std::endl;
 
     while(true) {
     	if(RECORD) {
