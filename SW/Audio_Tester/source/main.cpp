@@ -16,7 +16,7 @@
 #include <xscugic.h>
 #include <xil_exception.h>
 
-//#include <audio.hpp>
+#include <audio.hpp>
 
 #define BUTTONS_INTERRUPT 1
 
@@ -53,7 +53,7 @@ void button_handler(void *InstancePtr) {
 void init_gpio(void) {
 	// Setup the buttons with their interrupts
 
-	XGpio buttons;
+	static XGpio buttons;
 
 	int status = XGpio_Initialize(&buttons, XPAR_BUTTONS_DEVICE_ID);
 
@@ -63,7 +63,7 @@ void init_gpio(void) {
 
 	// Interrupt controller initialization
 
-	XScuGic gic;
+	static XScuGic gic;
 
 	XScuGic_Config *gic_config;
 
@@ -71,7 +71,7 @@ void init_gpio(void) {
 
 	status = XScuGic_CfgInitialize(&gic, gic_config, gic_config->CpuBaseAddress);
 
-	if(status != XST_SUCCESS) throw std::runtime_error("The GIC could not be initialized.");
+	if(status != XST_SUCCESS) throw std::runtime_error("The GIC configuration could not be initialized.");
 
 	// Enable GPIO interrupts interrupt
 
@@ -92,7 +92,7 @@ void init_gpio(void) {
 							 (Xil_ExceptionHandler) button_handler,
 							 (void*) &buttons);
 
-	if(status != XST_SUCCESS) throw std::runtime_error("The Mute GPIO could not be initialized.");
+	if(status != XST_SUCCESS) throw std::runtime_error("The button_handler could not be connected.");
 
 	// Enable GPIO interrupts in the controller
 
@@ -107,13 +107,13 @@ void init_gpio(void) {
 
 
 int main() {
-//    std::cout << "Beginning audio program..." << std::endl;
-//
-//    nluckett::Audio audio;
-//
-//    std::cout << "I2S Initialization Complete." << std::endl;
-//
-//    audio.unmute();
+    std::cout << "Beginning audio program..." << std::endl;
+
+    nluckett::Audio audio;
+
+    std::cout << "I2S Initialization Complete." << std::endl;
+
+    audio.unmute();
 
     std::cout << "Initializing GPIO with interrupts." << std::endl;
 
@@ -121,34 +121,32 @@ int main() {
 
     std::cout << "GPIO initialization complete." << std::endl;
 
-    while(true) {}
-//    	std::vector<u32> data;
-//
-//    	u32 buttons_state = XGpio_DiscreteRead(&buttons, 1);
-//
-//    	if(buttons_state != 0) {
-//    		std::cout << "Recording audio data." << std::endl;
-//
-//    		for(u32 rec_counter = 0; rec_counter < 2000; rec_counter++) {
-//    		    //buttons_state = XGpio_DiscreteRead(&buttons, 1);
-//
-//    		    audio.record(data);
-//    		}
-//
-//    		std::cout << "Recorded " << data.size() << " samples." << std::endl;
-//
-//    	}
-//
-//    	buttons_state = XGpio_DiscreteRead(&buttons, 1);
-//
-//    	if(buttons_state == 0 && data.size() > 0) {
-//    		std::cout << "Playing back audio data." << std::endl;
-//
-//			audio.playback(data);
-//
-//			std::cout << "Play back complete. " << data.size() << " samples remain in the buffer." <<  std::endl;
-//    	}
-//    }
+    while(true) {
+    	if(RECORD) {
+    		std::cout << "Enabling audio recording..." << std::endl;
+
+    		audio.disable_playback();
+
+    		audio.enable_recording();
+
+    		std::cout << "Recording enabled." << std::endl;
+
+    	} else if(PLAYBACK) {
+    		std::cout << "Enabling audio playback..." << std::endl;
+
+    		audio.disable_recording();
+
+    		audio.enable_playback();
+
+    		std::cout << "Playback enabled." << std::endl;
+
+    	} else {
+    		audio.disable_recording();
+
+    		audio.disable_playback();
+
+    	}
+    }
 
     return 0;
 }

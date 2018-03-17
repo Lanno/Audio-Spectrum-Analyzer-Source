@@ -9,7 +9,7 @@
 #define INCLUDE_AUDIO_HPP_
 
 #include <iostream>
-#include <vector>
+#include <queue>
 #include <stdexcept>
 
 #include <xparameters.h>
@@ -32,16 +32,39 @@ namespace nluckett {
 
 		XIicPs IIC;
 
+		bool recording;
+
+		bool playing;
+
+		std::queue<u32> data;
+
 	public:
 		Audio(void);
 
-		void record(std::vector<u32> &data);
+		void enable_recording(void);
 
-		void playback(std::vector<u32> &data);
+		void disable_recording(void);
+
+		void enable_playback(void);
+
+		void disable_playback(void);
+
+		bool recording_enabled(void);
+
+		bool playback_enabled(void);
+
+		void record(void);
+
+		void playback(void);
 
 		void mute(void);
 
 		void unmute(void);
+
+		logii2s_port get_tx(void);
+
+		logii2s_port get_rx(void);
+
 	};
 }
 
