@@ -9,7 +9,6 @@
 
 #include <audio.hpp>
 
-#define CORE_CLOCK_FREQ 100000000 // Hz
 #define SAMPLE_RATE         48000 // samples / second
 #define LONGEST_RECORD          5 // seconds
 
@@ -38,19 +37,10 @@ namespace nluckett {
         playing   = false;
 
         std::cout << "LogiCore I2S Version: " << logii2s_port_get_version(&i2s_base) << std::endl;
-        std::cout << "Instance 0 Direction: " << logii2s_port_direction(&i2s_rx)      << std::endl;
-        std::cout << "Instance 1 Direction: " << logii2s_port_direction(&i2s_rx)      << std::endl;
+        std::cout << "Instance 0 Direction: " << logii2s_port_direction(&i2s_tx)     << std::endl;
+        std::cout << "Instance 1 Direction: " << logii2s_port_direction(&i2s_rx)     << std::endl;
 
-        u32 actual_fs_0 = logii2s_port_init_clock(&i2s_tx, CORE_CLOCK_FREQ, SAMPLE_RATE);
-        u32 actual_fs_1 = logii2s_port_init_clock(&i2s_rx, CORE_CLOCK_FREQ, SAMPLE_RATE);
-
-        if(actual_fs_0 == 0) throw std::runtime_error("Instance 0's control register is not configured to be a clock and word select master.");
-
-        if(actual_fs_1 == 0) throw std::runtime_error("Instance 1's control register is not configured to be a clock and word select master.");
-
-        std::cout << "The requested sampling rate is: "       << SAMPLE_RATE << std::endl;
-        std::cout << "Instance 0's actual sampling rate is: " << actual_fs_0 << std::endl;
-        std::cout << "Instance 1's actual sampling rate is: " << actual_fs_1 << std::endl;
+        std::cout << "The expected sampling rate is: " << SAMPLE_RATE << std::endl;
 
         // Initialize the mute
 
@@ -134,16 +124,17 @@ namespace nluckett {
 	}
 
     void Audio::record(void) {
-    	logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
-
     	for(u32 idx = 0; idx < i2s_rx.almost_full; idx++) {
 			u32 sample = logii2s_port_read_fifo_word(&i2s_rx);
 
 			if(data.size() < (SAMPLE_RATE * LONGEST_RECORD)) {
 				data.push(sample);
-				std::cout << std::hex << sample << ", ";
 			}
     	}
+
+    	// Clearing the interrupt after processing is critical.
+
+    	logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
     }
 
     void Audio::playback(void) {
@@ -160,30 +151,36 @@ namespace nluckett {
 			}
 		}
 
+		// Clearing the interrupt after processing is critical.
+
 		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
 	}
 
     void Audio::play_reference(void) {
     	static float phase = 0;
 
-    	const float phase_step = 6.28 / 1e6;
+    	static u32 sample = 0;
+
+    	const float phase_step = 6.28 / 48;
 
 		for(u32 idx = 0; idx < (i2s_tx.fifo_size - i2s_tx.almost_empty); idx++) {
 			double value = sin(phase);
 
-			u32 sample = u32(value * (1 << 30));
+			u16 half_sample = u16(abs(value * (1 << 14)));
 
-			if(value > 0)
-				sample += (1 << 31);
+			if(value < 0)
+				half_sample = ~half_sample + 0x0001;
 
-			//u32 sample = (half_sample << 12) | half_sample;
+			sample = (half_sample << 16) | half_sample;
 
-			//std::cout << std::hex << sample << ", ";
-
-			logii2s_port_write_fifo_word(&i2s_tx, sample);
+			//std::cout << std::hex << value << ":" << half_sample << ":" << sample << ", ";
 
 			phase += phase_step;
+
+			logii2s_port_write_fifo_word(&i2s_tx, sample);
 		}
+
+		// Clearing the interrupt after processing is critical.
 
 		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
 	}
@@ -205,7 +202,7 @@ namespace nluckett {
 			audio->record();
 
 		} else if(audio->playback_enabled()) {
-			audio->play_reference();
+			audio->playback();
 
 		} else {
 			std::cout << "Bad audio interrupt." << std::endl;

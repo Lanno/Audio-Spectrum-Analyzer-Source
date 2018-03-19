@@ -24,20 +24,21 @@ set_property -dict { PACKAGE_PIN Y16   IOSTANDARD LVCMOS33 } [get_ports { button
 
 
 ##LEDs
-#set_property -dict { PACKAGE_PIN M14   IOSTANDARD LVCMOS33 } [get_ports { led[0] }]; #IO_L23P_T3_35 Sch=LED0
-#set_property -dict { PACKAGE_PIN M15   IOSTANDARD LVCMOS33 } [get_ports { led[1] }]; #IO_L23N_T3_35 Sch=LED1
-#set_property -dict { PACKAGE_PIN G14   IOSTANDARD LVCMOS33 } [get_ports { led[2] }]; #IO_0_3S5=Sch=LED2
-#set_property -dict { PACKAGE_PIN D18   IOSTANDARD LVCMOS33 } [get_ports { led[3] }]; #IO_L3N_T0_DQS_AD1N_35 Sch=LED3
+set_property -dict { PACKAGE_PIN M14   IOSTANDARD LVCMOS33 } [get_ports { leds_tri_o[0] }]; #IO_L23P_T3_35 Sch=LED0
+set_property -dict { PACKAGE_PIN M15   IOSTANDARD LVCMOS33 } [get_ports { leds_tri_o[1] }]; #IO_L23N_T3_35 Sch=LED1
+set_property -dict { PACKAGE_PIN G14   IOSTANDARD LVCMOS33 } [get_ports { leds_tri_o[2] }]; #IO_0_3S5=Sch=LED2
+set_property -dict { PACKAGE_PIN D18   IOSTANDARD LVCMOS33 } [get_ports { leds_tri_o[3] }]; #IO_L3N_T0_DQS_AD1N_35 Sch=LED3
 
 
 ##I2S Audio Codec
-set_property -dict { PACKAGE_PIN K18   IOSTANDARD LVCMOS33 } [get_ports i2s_0_bclk_out ]; #IO_L12N_T1_MRCC_35 Sch=AC_BCLK
-set_property -dict { PACKAGE_PIN T19   IOSTANDARD LVCMOS33 } [get_ports FCLK_CLK1_0    ]; #IO_25_34 Sch=AC_MCLK
-set_property -dict { PACKAGE_PIN P18   IOSTANDARD LVCMOS33 } [get_ports {mute_tri_o[0]}]; #IO_L23N_T3_34 Sch=AC_MUTEN
-set_property -dict { PACKAGE_PIN M17   IOSTANDARD LVCMOS33 } [get_ports i2s_0_s_out    ]; #IO_L8P_T1_AD10P_35 Sch=AC_PBDAT
-set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 } [get_ports i2s_0_ws_out   ]; #IO_L11N_T1_SRCC_35 Sch=AC_PBLRC
-set_property -dict { PACKAGE_PIN K17   IOSTANDARD LVCMOS33 } [get_ports i2s_1_s_in     ]; #IO_L12P_T1_MRCC_35 Sch=AC_RECDAT
-set_property -dict { PACKAGE_PIN M18   IOSTANDARD LVCMOS33 } [get_ports i2s_1_ws_out   ]; #IO_L8N_T1_AD10N_35 Sch=AC_RECLRC
+set_property -dict { PACKAGE_PIN T19   IOSTANDARD LVCMOS33 } [get_ports FCLK_CLK1        ]; #IO_25_34 Sch=AC_MCLK
+set_property -dict { PACKAGE_PIN P18   IOSTANDARD LVCMOS33 } [get_ports {mute_tri_o[0]}  ]; #IO_L23N_T3_34 Sch=AC_MUTEN
+set_property -dict { PACKAGE_PIN K18   IOSTANDARD LVCMOS33 } [get_ports audio_bclk       ]; #IO_L12N_T1_MRCC_35 Sch=AC_BCLK
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {audio_bclk_IBUF}];
+set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 } [get_ports audio_tx_ws      ]; #IO_L11N_T1_SRCC_35 Sch=AC_PBLRC
+set_property -dict { PACKAGE_PIN M17   IOSTANDARD LVCMOS33 } [get_ports audio_tx         ]; #IO_L8P_T1_AD10P_35 Sch=AC_PBDAT
+set_property -dict { PACKAGE_PIN M18   IOSTANDARD LVCMOS33 } [get_ports audio_rx_ws      ]; #IO_L8N_T1_AD10N_35 Sch=AC_RECLRC
+set_property -dict { PACKAGE_PIN K17   IOSTANDARD LVCMOS33 } [get_ports audio_rx         ]; #IO_L12P_T1_MRCC_35 Sch=AC_RECDAT
 
 
 ##Audio Codec/external EEPROM IIC bus

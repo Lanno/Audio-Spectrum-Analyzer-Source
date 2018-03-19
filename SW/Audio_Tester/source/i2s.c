@@ -68,11 +68,11 @@ void AudioPllConfig(XIicPs *Iic) {
 	AudioWriteToReg(Iic, R6_POWER_MANAGEMENT, 				0b000110000); //Power Up
 	AudioWriteToReg(Iic, R0_LEFT_CHANNEL_ADC_INPUT_VOLUME, 	0b000010111); //Default Volume
 	AudioWriteToReg(Iic, R1_RIGHT_CHANNEL_ADC_INPUT_VOLUME, 0b000010111); //Default Volume
-	AudioWriteToReg(Iic, R2_LEFT_CHANNEL_DAC_VOLUME, 		0b001111001);
-	AudioWriteToReg(Iic, R3_RIGHT_CHANNEL_DAC_VOLUME, 		0b001111001);
+	AudioWriteToReg(Iic, R2_LEFT_CHANNEL_DAC_VOLUME, 		0b001100000);
+	AudioWriteToReg(Iic, R3_RIGHT_CHANNEL_DAC_VOLUME, 		0b001100000);
 	AudioWriteToReg(Iic, R4_ANALOG_AUDIO_PATH, 				0b000010010); //Allow Mixed DAC, Mute MIC
 	AudioWriteToReg(Iic, R5_DIGITAL_AUDIO_PATH, 			0b000000111); //48 kHz Sampling Rate emphasis, no high pass
-	AudioWriteToReg(Iic, R7_DIGITAL_AUDIO_I_F, 				0b000001110); //I2S Mode, set-up 32 bits
+	AudioWriteToReg(Iic, R7_DIGITAL_AUDIO_I_F, 				0b001000010); //Master, I2S Mode, 16 bits
 	AudioWriteToReg(Iic, R8_SAMPLING_RATE, 					0b000000000);
 	usleep(75000);
 	AudioWriteToReg(Iic, R9_ACTIVE, 						0b000000001); //Activate digital core
