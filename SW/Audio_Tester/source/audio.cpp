@@ -5,10 +5,13 @@
  *      Author: noluc_000
  */
 
+#include <cmath>
+
 #include <audio.hpp>
 
-#define CORE_CLOCK_FREQ 100000000
-#define SAMPLE_RATE         48000
+#define CORE_CLOCK_FREQ 100000000 // Hz
+#define SAMPLE_RATE         48000 // samples / second
+#define LONGEST_RECORD          5 // seconds
 
 namespace nluckett {
     Audio::Audio(void)
@@ -17,16 +20,16 @@ namespace nluckett {
 
         // Initialize the I2S structures.
 
-        i2s_base.base         = XPAR_LOGII2S_BASEADDR;
+        i2s_base.base       = XPAR_LOGII2S_BASEADDR;
 
         i2s_tx.base         = XPAR_LOGII2S_BASEADDR + LOGII2S_INST_OFFSET;
-        i2s_tx.clock_freq   = 12288000;
+        i2s_tx.clock_freq   = 4000000;
         i2s_tx.fifo_size    = 512;
         i2s_tx.almost_full  = 170;
         i2s_tx.almost_empty = 85;
 
         i2s_rx.base         = XPAR_LOGII2S_BASEADDR + 2 * LOGII2S_INST_OFFSET;
-        i2s_rx.clock_freq   = 12288000;
+        i2s_rx.clock_freq   = 4000000;
         i2s_rx.fifo_size    = 512;
         i2s_rx.almost_full  = 170;
         i2s_rx.almost_empty = 85;
@@ -63,43 +66,47 @@ namespace nluckett {
     }
 
     void Audio::enable_recording(void) {
+		recording = true;
+
 		logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
 
 		logii2s_port_unmask_int(&i2s_rx, LOGII2S_INT_FAF);
 
 		logii2s_port_enable_xfer(&i2s_rx);
 
-		recording = true;
     }
 
     void Audio::disable_recording(void) {
-		logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
-
-		logii2s_port_mask_int(&i2s_rx, LOGII2S_INT_FAF);
+		recording = false;
 
 		logii2s_port_disable_xfer(&i2s_rx);
 
-		recording = false;
+		logii2s_port_mask_int(&i2s_rx, LOGII2S_INT_FAF);
+
+		logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
+
 	}
 
     void Audio::enable_playback(void) {
+		playing = true;
+
 		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
 
 		logii2s_port_unmask_int(&i2s_tx, LOGII2S_INT_FAE);
 
 		logii2s_port_enable_xfer(&i2s_tx);
 
-		playing = true;
     }
 
     void Audio::disable_playback(void) {
-		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
-
-		logii2s_port_mask_int(&i2s_tx, LOGII2S_INT_FAE);
+		playing = false;
 
 		logii2s_port_disable_xfer(&i2s_tx);
 
-		playing = false;
+		logii2s_port_mask_int(&i2s_tx, LOGII2S_INT_FAE);
+
+		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
+
 	}
 
     bool Audio::recording_enabled(void) {
@@ -127,60 +134,91 @@ namespace nluckett {
 	}
 
     void Audio::record(void) {
+    	logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
+
     	for(u32 idx = 0; idx < i2s_rx.almost_full; idx++) {
 			u32 sample = logii2s_port_read_fifo_word(&i2s_rx);
 
-			data.push(sample);
+			if(data.size() < (SAMPLE_RATE * LONGEST_RECORD)) {
+				data.push(sample);
+				std::cout << std::hex << sample << ", ";
+			}
     	}
     }
 
     void Audio::playback(void) {
 		for(u32 idx = 0; idx < (i2s_tx.fifo_size - i2s_tx.almost_empty); idx++) {
-			u32 sample = data.front();
+			if(data.size() > 0) {
+				u32 sample = data.front();
 
-			data.pop();
+				data.pop();
+
+				logii2s_port_write_fifo_word(&i2s_tx, sample);
+
+			} else {
+				logii2s_port_write_fifo_word(&i2s_tx, 0);
+			}
+		}
+
+		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
+	}
+
+    void Audio::play_reference(void) {
+    	static float phase = 0;
+
+    	const float phase_step = 6.28 / 1e6;
+
+		for(u32 idx = 0; idx < (i2s_tx.fifo_size - i2s_tx.almost_empty); idx++) {
+			double value = sin(phase);
+
+			u32 sample = u32(value * (1 << 30));
+
+			if(value > 0)
+				sample += (1 << 31);
+
+			//u32 sample = (half_sample << 12) | half_sample;
+
+			//std::cout << std::hex << sample << ", ";
 
 			logii2s_port_write_fifo_word(&i2s_tx, sample);
+
+			phase += phase_step;
 		}
+
+		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
 	}
+
+    void Audio::clear_interrupts(void) {
+    	logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
+
+    	logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
+    }
+
+    u32 Audio::size(void) {
+    	return data.size();
+    }
 
 	void audio_handler(void *audio_instance) {
 		Audio* audio = (Audio*)audio_instance;
 
 		if(audio->recording_enabled()) {
-			std::cout << "R";
-
 			audio->record();
 
 		} else if(audio->playback_enabled()) {
-			std::cout << "P";
+			audio->play_reference();
 
-			audio->playback();
+		} else {
+			std::cout << "Bad audio interrupt." << std::endl;
 
+			audio->clear_interrupts();
 		}
 
 	}
 
-	void init_audio_interrupts(Audio& audio_instance) {
-		// Interrupt controller initialization
-		static XScuGic gic;
-
-		XScuGic_Config *gic_config;
-
-		gic_config = XScuGic_LookupConfig(XPAR_PS7_SCUGIC_0_DEVICE_ID);
-
-		int status = XScuGic_CfgInitialize(&gic, gic_config, gic_config->CpuBaseAddress);
-
-		if(status != XST_SUCCESS) throw std::runtime_error("The GIC configuration could not be initialized.");
-
-		Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
-									(Xil_ExceptionHandler) XScuGic_InterruptHandler,
-									 &gic);
-
-		Xil_ExceptionEnable();
-
+	void init_audio_interrupts(Audio& audio_instance, XScuGic& gic) {
 		// Connect device interrupt to handler
-		status = XScuGic_Connect(&gic,
+
+		u32 status = XScuGic_Connect(&gic,
 								 XPAR_FABRIC_LOGII2S_INTERRUPT_INTR,
 								 (Xil_ExceptionHandler) audio_handler,
 								 (void*) &audio_instance);
@@ -188,6 +226,7 @@ namespace nluckett {
 		if(status != XST_SUCCESS) throw std::runtime_error("The audio_handler could not be connected.");
 
 		// Enable LOGII2S interrupts in the controller
+
 		XScuGic_Enable(&gic, XPAR_FABRIC_LOGII2S_INTERRUPT_INTR);
 	}
 }

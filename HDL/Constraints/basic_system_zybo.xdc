@@ -32,7 +32,7 @@ set_property -dict { PACKAGE_PIN Y16   IOSTANDARD LVCMOS33 } [get_ports { button
 
 ##I2S Audio Codec
 set_property -dict { PACKAGE_PIN K18   IOSTANDARD LVCMOS33 } [get_ports i2s_0_bclk_out ]; #IO_L12N_T1_MRCC_35 Sch=AC_BCLK
-set_property -dict { PACKAGE_PIN T19   IOSTANDARD LVCMOS33 } [get_ports tx_clk_0       ]; #IO_25_34 Sch=AC_MCLK
+set_property -dict { PACKAGE_PIN T19   IOSTANDARD LVCMOS33 } [get_ports FCLK_CLK1_0    ]; #IO_25_34 Sch=AC_MCLK
 set_property -dict { PACKAGE_PIN P18   IOSTANDARD LVCMOS33 } [get_ports {mute_tri_o[0]}]; #IO_L23N_T3_34 Sch=AC_MUTEN
 set_property -dict { PACKAGE_PIN M17   IOSTANDARD LVCMOS33 } [get_ports i2s_0_s_out    ]; #IO_L8P_T1_AD10P_35 Sch=AC_PBDAT
 set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 } [get_ports i2s_0_ws_out   ]; #IO_L11N_T1_SRCC_35 Sch=AC_PBLRC

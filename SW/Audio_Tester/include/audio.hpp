@@ -57,6 +57,12 @@ namespace nluckett {
 
 		void playback(void);
 
+		void play_reference(void);
+
+		void clear_interrupts(void);
+
+		u32 size(void);
+
 		void mute(void);
 
 		void unmute(void);
@@ -68,7 +74,8 @@ namespace nluckett {
 	};
 
 	void audio_handler(void *audio_instance);
-	void init_audio_interrupts(Audio& audio_instance);
+
+	void init_audio_interrupts(Audio& audio_instance, XScuGic& gic);
 }
 
 #endif /* INCLUDE_AUDIO_HPP_ */

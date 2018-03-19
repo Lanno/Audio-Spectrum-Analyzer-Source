@@ -39,8 +39,6 @@ void button_handler(void *InstancePtr) {
 	if     ((button_value & 0x2) == 0x2 && PLAYBACK == false) PLAYBACK = true;
 	else if((button_value & 0x2) == 0x0 && PLAYBACK == true ) PLAYBACK = false;
 
-	std::cout << "Button state: " << button_value << std::endl;
-
 	std::cout << "Record: " << RECORD << " Playback: " << PLAYBACK << std::endl;
 
     XGpio_InterruptClear((XGpio*) InstancePtr, BUTTONS_INTERRUPT);
@@ -49,8 +47,25 @@ void button_handler(void *InstancePtr) {
     XGpio_InterruptEnable((XGpio*) InstancePtr, BUTTONS_INTERRUPT);
 }
 
+void init_gic(XScuGic& gic) {
+	XScuGic_Config *gic_config;
 
-void init_gpio(void) {
+	gic_config = XScuGic_LookupConfig(XPAR_PS7_SCUGIC_0_DEVICE_ID);
+
+	u32 status = XScuGic_CfgInitialize(&gic, gic_config, gic_config->CpuBaseAddress);
+
+	if(status != XST_SUCCESS) throw std::runtime_error("The GIC configuration could not be initialized.");
+
+	// Enable GPIO interrupts interrupt
+
+	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
+								(Xil_ExceptionHandler) XScuGic_InterruptHandler,
+								 &gic);
+
+	Xil_ExceptionEnable();
+}
+
+void init_gpio(XScuGic& gic) {
 	// Setup the buttons with their interrupts
 
 	static XGpio buttons;
@@ -60,30 +75,6 @@ void init_gpio(void) {
 	if(status != XST_SUCCESS) throw std::runtime_error("The button GPIO could not be initialized.");
 
 	XGpio_SetDataDirection(&buttons, 1, 0xF);
-
-	// Interrupt controller initialization
-
-	static XScuGic gic;
-
-	XScuGic_Config *gic_config;
-
-	gic_config = XScuGic_LookupConfig(XPAR_PS7_SCUGIC_0_DEVICE_ID);
-
-	status = XScuGic_CfgInitialize(&gic, gic_config, gic_config->CpuBaseAddress);
-
-	if(status != XST_SUCCESS) throw std::runtime_error("The GIC configuration could not be initialized.");
-
-	// Enable GPIO interrupts interrupt
-
-	XGpio_InterruptEnable(&buttons, BUTTONS_INTERRUPT);
-
-	XGpio_InterruptGlobalEnable(&buttons);
-
-	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
-								(Xil_ExceptionHandler) XScuGic_InterruptHandler,
-								 &gic);
-
-	Xil_ExceptionEnable();
 
 	// Connect GPIO interrupt to handler
 
@@ -115,32 +106,30 @@ int main() {
 
     audio.unmute();
 
-    init_gpio();
+    XScuGic gic;
+
+    init_gic(gic);
+
+    std::cout << "GIC initialization complete." << std::endl;
+
+    init_gpio(gic);
 
     std::cout << "GPIO initialization complete." << std::endl;
 
-    init_audio_interrupts(audio);
+    init_audio_interrupts(audio, gic);
 
     std::cout << "Audio interrupt initialization complete." << std::endl;
 
     while(true) {
     	if(RECORD) {
-    		std::cout << "Enabling audio recording..." << std::endl;
-
     		audio.disable_playback();
 
     		audio.enable_recording();
 
-    		std::cout << "Recording enabled." << std::endl;
-
     	} else if(PLAYBACK) {
-    		std::cout << "Enabling audio playback..." << std::endl;
-
     		audio.disable_recording();
 
     		audio.enable_playback();
-
-    		std::cout << "Playback enabled." << std::endl;
 
     	} else {
     		audio.disable_recording();
