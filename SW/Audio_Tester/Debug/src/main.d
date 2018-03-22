@@ -1,1 +1,1 @@
-src/main.o src/main.o: ../src/main.cc
+src/main.o src/main.o: ../src/main.cpp

@@ -6,18 +6,18 @@
 LD_SRCS += \
 ../src/lscript.ld 
 
-CC_SRCS += \
-../src/main.cc 
-
-CC_DEPS += \
-./src/main.d 
+CPP_SRCS += \
+../src/main.cpp 
 
 OBJS += \
 ./src/main.o 
 
+CPP_DEPS += \
+./src/main.d 
+
 
 # Each subdirectory must supply rules for building sources it contributes
-src/%.o: ../src/%.cc
+src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: ARM v7 g++ compiler'
 	arm-none-eabi-g++ -Wall -O0 -g3 -c -fmessage-length=0 -MT"$@" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/noluc_000/OneDrive/CSULB/CECS_Spring_2018/CECS561/Final_Project/Basic/Basic.sdk/audio_tester_bsp/ps7_cortexa9_0/include -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
