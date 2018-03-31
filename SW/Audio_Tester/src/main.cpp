@@ -8,10 +8,14 @@
 // Class: CECS561
 // Project: Final Project, Basic System
 
+#include "../include/audio.hpp"
 
-int main()
-{
+int main() {
+	nluckett::Audio audio;
 
+	audio.record();
+
+	audio.playback();
 
 	return 0;
 }
