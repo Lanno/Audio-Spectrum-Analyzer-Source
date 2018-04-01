@@ -8,14 +8,18 @@
 #ifndef INCLUDE_AUDIO_HPP_
 #define INCLUDE_AUDIO_HPP_
 
+#include <logii2s.h>
+
 namespace nluckett {
 	class Audio {
+		logii2s_port i2s;
+
 	public:
 		Audio(void);
 
-		unsigned int record(void);
+		u32 record(void);
 
-		unsigned int playback(void);
+		u32 playback(void);
 	};
 }
 

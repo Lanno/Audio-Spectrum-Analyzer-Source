@@ -8,9 +8,12 @@
 // Class: CECS561
 // Project: Final Project, Basic System
 
-#include "../include/audio.hpp"
+#include <audio.hpp>
+
 
 int main() {
+	xil_printf("Entering main.");
+
 	nluckett::Audio audio;
 
 	audio.record();
