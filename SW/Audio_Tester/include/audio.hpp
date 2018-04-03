@@ -8,6 +8,8 @@
 #ifndef INCLUDE_AUDIO_HPP_
 #define INCLUDE_AUDIO_HPP_
 
+#include <iostream>
+
 #include <logii2s.h>
 
 namespace nluckett {

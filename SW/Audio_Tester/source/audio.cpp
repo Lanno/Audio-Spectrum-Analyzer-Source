@@ -21,12 +21,10 @@ namespace nluckett {
 		i2s.almost_full  = 170;
 		i2s.almost_empty = 85;
 
-		//
+		//u32 actual_fs = logii2s_port_init_clock(&i2s, CORE_CLOCK_FREQ, SAMPLE_RATE);
 
-		u32 actual_fs = logii2s_port_init_clock(&i2s, CORE_CLOCK_FREQ, SAMPLE_RATE);
-
-		xil_printf("The requested sampling rate is: %d", SAMPLE_RATE);
-		xil_printf("The actual sampling rate is: %d", actual_fs);
+		std::cout << "The requested sampling rate is: " << SAMPLE_RATE << std::endl;
+		//std::cout << "The actual sampling rate is: "    << actual_fs   << std::endl;
 	}
 
 	u32 Audio::record(void) {

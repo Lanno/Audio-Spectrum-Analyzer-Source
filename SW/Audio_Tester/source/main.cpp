@@ -8,13 +8,15 @@
 // Class: CECS561
 // Project: Final Project, Basic System
 
+#include <iostream>
+
 #include <audio.hpp>
 
 
 int main() {
-	xil_printf("Entering main.");
+	std::cout << "Entered program." << std::endl;
 
-	nluckett::Audio audio;
+    nluckett::Audio audio;
 
 	audio.record();
 
