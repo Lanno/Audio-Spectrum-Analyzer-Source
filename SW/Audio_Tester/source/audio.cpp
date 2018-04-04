@@ -15,15 +15,17 @@ namespace nluckett {
 
 		// Initialize the I2S structure.
 
-		i2s.base         = XPAR_AUDIO_INTERFACE_BASEADDR;
+		i2s.base         = XPAR_LOGII2S_BASEADDR;
 		i2s.clock_freq   = 24;
 		i2s.fifo_size    = 512;
 		i2s.almost_full  = 170;
 		i2s.almost_empty = 85;
 
+		std::cout << "LogiCore I2S Version: " << logii2s_port_get_version(&i2s) << std::endl;
+
 		//u32 actual_fs = logii2s_port_init_clock(&i2s, CORE_CLOCK_FREQ, SAMPLE_RATE);
 
-		std::cout << "The requested sampling rate is: " << SAMPLE_RATE << std::endl;
+		//std::cout << "The requested sampling rate is: " << SAMPLE_RATE << std::endl;
 		//std::cout << "The actual sampling rate is: "    << actual_fs   << std::endl;
 	}
 

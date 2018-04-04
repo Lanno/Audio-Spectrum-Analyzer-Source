@@ -14,7 +14,7 @@
 
 
 int main() {
-	std::cout << "Entered program." << std::endl;
+	std::cout << "Beginning audio program..." << std::endl;
 
     nluckett::Audio audio;
 

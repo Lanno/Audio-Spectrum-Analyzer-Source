@@ -10,6 +10,8 @@
 
 #include <iostream>
 
+#include <xparameters.h>
+
 #include <logii2s.h>
 
 namespace nluckett {
