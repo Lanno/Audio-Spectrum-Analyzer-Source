@@ -9,18 +9,30 @@
 // Project: Final Project, Basic System
 
 #include <iostream>
+#include <vector>
+#include <cstdlib>
 
 #include <audio.hpp>
 
 
 int main() {
-	std::cout << "Beginning audio program..." << std::endl;
+    std::cout << "Beginning audio program..." << std::endl;
 
     nluckett::Audio audio;
 
-	audio.record();
+    std::cout << "I2S Initialization Complete." << std::endl;
 
-	audio.playback();
+    audio.unmute();
 
-	return 0;
+	// audio.record();
+
+    std::vector<u32> data;
+
+    for(int idx = 0; idx < 512; idx++)
+        data.push_back(std::rand() % (1 << 24));
+
+    while(true)
+    	audio.playback(data);
+
+    return 0;
 }
