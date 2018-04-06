@@ -21,9 +21,9 @@ namespace nluckett {
 	class Audio {
 		logii2s_port i2s_base;
 
-		logii2s_port i2s_0;
+		logii2s_port i2s_tx;
 
-		logii2s_port i2s_1;
+		logii2s_port i2s_rx;
 
 		XGpio *mute_ptr;
 
@@ -32,7 +32,7 @@ namespace nluckett {
 	public:
 		Audio(void);
 
-		u32 record(void);
+		void record(std::vector<u32> &data);
 
 		u32 playback(std::vector<u32> &data);
 
