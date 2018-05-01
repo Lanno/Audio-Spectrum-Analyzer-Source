@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<title>Audio Analyzer</title>
+		<link href="{{'index.css' | staticfile}}" rel="stylesheet" type="text/css">
+		<script language="javascript" type="text/javascript" src="{{'flot/jquery.js' | staticfile}}"></script>
+		<script language="javascript" type="text/javascript" src="{{'flot/jquery.flot.js' | staticfile}}"></script>
+		<script type="text/javascript">
+			$(function() {
+				var d1 = [];
+				
+				for (var i = 0; i < 14; i += 0.5) {
+					d1.push([i, Math.sin(i)]);
+				}
+
+				var d2 = [[0, 3], [4, 8], [8, 5], [9, 13]];
+
+				// A null signifies separate line segments
+
+				var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
+
+				$.plot("#time_domain", [ d1, d2, d3 ]);
+				
+				$.plot("#freq_domain", [ d1, d2, d3 ]);
+			});
+
+		</script>
+	</head>
+	
+	<body>
+		<div id="wrapper">
+			<h1>Time Domain Plot</h1>
+		
+			<div id="time_domain" class="plot"></div>
+			
+			<h1>Frequency Domain Plot</h1>
+			
+			<div id="freq_domain" class="plot"></div>
+		</div>
+	</body>
+</html>

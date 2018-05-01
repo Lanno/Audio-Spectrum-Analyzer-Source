@@ -1,0 +1,10 @@
+#wrapper {
+	width: 1200px;
+	height: 100%;
+	margin: 20px auto;
+}
+
+.plot {
+	width: 100%;
+	height: 25%;
+}
