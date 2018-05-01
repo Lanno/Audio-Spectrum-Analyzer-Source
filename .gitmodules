@@ -1,3 +1,6 @@
 [submodule "SW/LogiBricks_I2S_Driver"]
 	path = SW/LogiBricks_I2S_Driver
 	url = https://github.com/logicbricks/driver_alsa_logii2s.git
+[submodule "nlohmann-json"]
+	path = SW/nlohmann-json
+	url = https://github.com/nlohmann/json.git
