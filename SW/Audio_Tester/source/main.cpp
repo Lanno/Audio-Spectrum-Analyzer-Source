@@ -8,15 +8,17 @@
 // Class: CECS561
 // Project: Final Project, Basic System
 
-#include <iostream>
+#include <sstream>
 #include <vector>
 
 #include <xparameters.h>
 #include <xgpio.h>
 #include <xscugic.h>
 #include <xil_exception.h>
+#include <json.hpp>
 
 #include <audio.hpp>
+#include <serial_comm.hpp>
 
 #define BUTTONS_INTERRUPT 1
 
@@ -39,7 +41,11 @@ void button_handler(void *InstancePtr) {
 	if     ((button_value & 0x2) == 0x2 && PLAYBACK == false) PLAYBACK = true;
 	else if((button_value & 0x2) == 0x0 && PLAYBACK == true ) PLAYBACK = false;
 
-	std::cout << "Record: " << RECORD << " Playback: " << PLAYBACK << std::endl;
+	std::stringstream payload;
+
+	payload << "Record: " << RECORD << "Playback: " << PLAYBACK;
+
+	//send_message(payload);
 
     XGpio_InterruptClear((XGpio*) InstancePtr, BUTTONS_INTERRUPT);
 
@@ -54,7 +60,9 @@ void init_gic(XScuGic& gic) {
 
 	u32 status = XScuGic_CfgInitialize(&gic, gic_config, gic_config->CpuBaseAddress);
 
-	if(status != XST_SUCCESS) throw std::runtime_error("The GIC configuration could not be initialized.");
+	if(status != XST_SUCCESS)
+		throw_exception("The GIC configuration could not be initialized.");
+
 
 	// Enable GPIO interrupts interrupt
 
@@ -72,7 +80,9 @@ void init_gpio(XScuGic& gic) {
 
 	int status = XGpio_Initialize(&buttons, XPAR_BUTTONS_DEVICE_ID);
 
-	if(status != XST_SUCCESS) throw std::runtime_error("The button GPIO could not be initialized.");
+	if(status != XST_SUCCESS)
+		throw_exception("The button GPIO could not be initialized.");
+
 
 	XGpio_SetDataDirection(&buttons, 1, 0xF);
 
@@ -83,7 +93,8 @@ void init_gpio(XScuGic& gic) {
 							 (Xil_ExceptionHandler) button_handler,
 							 (void*) &buttons);
 
-	if(status != XST_SUCCESS) throw std::runtime_error("The button_handler could not be connected.");
+	if(status != XST_SUCCESS)
+		throw_exception("The button GPIO could not be initialized.");
 
 	// Enable GPIO interrupts in the controller
 
@@ -98,11 +109,11 @@ void init_gpio(XScuGic& gic) {
 
 
 int main() {
-    std::cout << "Beginning audio program..." << std::endl;
+    send_message("Beginning audio program...");
 
     nluckett::Audio audio;
 
-    std::cout << "I2S initialization complete." << std::endl;
+	send_message("I2S initialization complete.");
 
     audio.unmute();
 
@@ -110,15 +121,15 @@ int main() {
 
     init_gic(gic);
 
-    std::cout << "GIC initialization complete." << std::endl;
+    send_message("GIC initialization complete.");
 
     init_gpio(gic);
 
-    std::cout << "GPIO initialization complete." << std::endl;
+    send_message("GPIO initialization complete.");
 
     init_audio_interrupts(audio, gic);
 
-    std::cout << "Audio interrupt initialization complete." << std::endl;
+    send_message("Audio interrupt initialization complete.");
 
     while(true) {
     	if(RECORD) {

@@ -5,9 +5,13 @@
  *      Author: noluc_000
  */
 
+#include <sstream>
 #include <cmath>
 
+#include <json.hpp>
+
 #include <audio.hpp>
+#include <serial_comm.hpp>
 
 #define SAMPLE_RATE         48000 // samples / second
 #define LONGEST_RECORD          5 // seconds
@@ -36,17 +40,20 @@ namespace nluckett {
         recording = false;
         playing   = false;
 
-        std::cout << "LogiCore I2S Version: " << logii2s_port_get_version(&i2s_base) << std::endl;
-        std::cout << "Instance 0 Direction: " << logii2s_port_direction(&i2s_tx)     << std::endl;
-        std::cout << "Instance 1 Direction: " << logii2s_port_direction(&i2s_rx)     << std::endl;
+        std::stringstream payload;
 
-        std::cout << "The expected sampling rate is: " << SAMPLE_RATE << std::endl;
+        payload << "LogiCore I2S Version: " << logii2s_port_get_version(&i2s_base)
+        		<< "Instance 0 Direction: " << logii2s_port_direction(&i2s_tx)
+				<< "Instance 1 Direction: " << logii2s_port_direction(&i2s_rx);
+
+        //send_message(payload);
 
         // Initialize the mute
 
         int status = XGpio_Initialize(mute_ptr, XPAR_MUTE_DEVICE_ID);
 
-        if(status != XST_SUCCESS) throw std::runtime_error("The Mute GPIO could not be initialized.");
+        if(status != XST_SUCCESS)
+        	throw_exception("The Mute GPIO could not be initialized.");
 
         // I2C Stuff
 
@@ -173,8 +180,6 @@ namespace nluckett {
 
 			sample = (half_sample << 16) | half_sample;
 
-			//std::cout << std::hex << value << ":" << half_sample << ":" << sample << ", ";
-
 			phase += phase_step;
 
 			logii2s_port_write_fifo_word(&i2s_tx, sample);
@@ -205,7 +210,7 @@ namespace nluckett {
 			audio->playback();
 
 		} else {
-			std::cout << "Bad audio interrupt." << std::endl;
+			send_message("Bad audio interrupt.");
 
 			audio->clear_interrupts();
 		}
@@ -220,7 +225,8 @@ namespace nluckett {
 								 (Xil_ExceptionHandler) audio_handler,
 								 (void*) &audio_instance);
 
-		if(status != XST_SUCCESS) throw std::runtime_error("The audio_handler could not be connected.");
+		if(status != XST_SUCCESS)
+			throw_exception("The audio_handler could not be connected.");
 
 		// Enable LOGII2S interrupts in the controller
 
