@@ -18,7 +18,7 @@ void send_data(std::deque<u32> payload) {
 
 void throw_exception(std::string payload) {
 	nlohmann::json exception = {
-		{"exception", payload}
+		{"error", payload}
 	};
 
 	throw std::runtime_error(exception.dump());
