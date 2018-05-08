@@ -21,13 +21,31 @@
 				$.plot("#time_domain", [ d1, d2, d3 ]);
 				
 				$.plot("#freq_domain", [ d1, d2, d3 ]);
+				
+				setInterval(function() {
+					var item = Queue_Wrapper.message();
+					
+					if(item !== "empty") {
+						var elem = $("<li></li>")
+							.append(item);
+					
+						$("#messages").append(elem);
+					}
+					
+				}, 1000);
 			});
 
 		</script>
 	</head>
 	
 	<body>
-		<div id="wrapper">
+		<div id="left">
+			<h1>Message Terminal</h1>
+			
+			<ol id="messages"></ol>
+		</div>
+		
+		<div id="right">
 			<h1>Time Domain Plot</h1>
 		
 			<div id="time_domain" class="plot"></div>
@@ -35,6 +53,7 @@
 			<h1>Frequency Domain Plot</h1>
 			
 			<div id="freq_domain" class="plot"></div>
+			
 		</div>
 	</body>
 </html>

@@ -3,7 +3,7 @@ from Queue import Queue
 
 import htmlPy
 
-from serial_io import Read_Thread
+from serial_io import Read_Thread, Queue_Wrapper
 
 #######################################################################################
 
@@ -23,16 +23,21 @@ data_queue = Queue()
 
 error_queue = Queue()
 
-reader = Read_Thread(message_queue, data_queue, error_queue)
+try:
+	reader = Read_Thread(message_queue, data_queue, error_queue)
 
-reader.start()
+except Exception as error:
+	print error
+	
+	input()
+	
+	exit()
+	
+else:
+	reader.start()
 
 #######################################################################################
-
-app.bind(message_queue)
-
-app.bind(data_queue)
-
-app.bind(error_queue)
+	
+app.bind(Queue_Wrapper(message_queue, data_queue, error_queue))
 
 app.start()

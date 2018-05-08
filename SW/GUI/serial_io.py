@@ -1,9 +1,27 @@
 from threading import Thread
-from Queue import Queue
+from Queue import Empty
+from json import loads
 
 from serial import Serial as pyserial
+import htmlPy
 
-from json import loads
+class Queue_Wrapper(htmlPy.Object):
+    def __init__(self, message_queue, data_queue, error_queue):
+        htmlPy.Object.__init__(self)
+        
+        self._message_queue = message_queue
+        
+        self._data_queue = data_queue
+        
+        self._error_queue = error_queue
+        
+    @htmlPy.Slot(result=str)    
+    def message(self):
+        try:
+            return self._message_queue.get(False)
+            
+        except Empty:
+            return "empty"
 
 class Serial_IO:
     def __init__(self, port, message_queue, data_queue, error_queue, baud_rate=115200):
@@ -71,6 +89,8 @@ class Read_Thread(Thread):
                         buffer = message
                         
                     else:
+                        buffer = ""
+                    
                         if item.keys()[0] == "message":
                             self._message_queue.put(item["message"])
                     

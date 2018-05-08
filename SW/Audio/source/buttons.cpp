@@ -25,12 +25,6 @@ void button_handler(void *InstancePtr) {
 	if     ((button_value & 0x4) == 0x4 && ANALYZE == false) ANALYZE = true;
 	else if((button_value & 0x4) == 0x0 && ANALYZE == true ) ANALYZE = false;
 
-//	std::stringstream payload;
-//
-//	std::cout << "Record: " << RECORD << "Playback: " << PLAYBACK << "Analyze" << ANALYZE << std::endl;
-
-	//send_message(payload);
-
     XGpio_InterruptClear((XGpio*) InstancePtr, BUTTONS_INTERRUPT);
 
     // Enable GPIO interrupts

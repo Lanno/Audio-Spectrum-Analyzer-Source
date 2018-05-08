@@ -5,15 +5,15 @@ void send_message(std::string payload) {
 		{"message", payload}
 	};
 
-	std::cout << message << std::endl;
+	std::cout << message << std::endl << std::endl;
 }
 
 void send_data(std::deque<u32> payload) {
-	nlohmann::json message;
+	nlohmann::json message ={
+		{"data", payload}
+	};
 
-	message["data"] = payload;
-
-	std::cout << message << std::endl;
+	std::cout << message << std::endl << std::endl;
 }
 
 void throw_exception(std::string payload) {

@@ -64,47 +64,59 @@ namespace nluckett {
     }
 
     void Audio::enable_recording(void) {
-		recording = true;
+		if(recording == false) {
+			recording = true;
 
-		logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
+			logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
 
-		logii2s_port_unmask_int(&i2s_rx, LOGII2S_INT_FAF);
+			logii2s_port_unmask_int(&i2s_rx, LOGII2S_INT_FAF);
 
-		logii2s_port_enable_xfer(&i2s_rx);
+			logii2s_port_enable_xfer(&i2s_rx);
 
+			send_message("Recording...");
+		}
     }
 
     void Audio::disable_recording(void) {
-		recording = false;
+    	if(recording == true) {
+			recording = false;
 
-		logii2s_port_disable_xfer(&i2s_rx);
+			logii2s_port_disable_xfer(&i2s_rx);
 
-		logii2s_port_mask_int(&i2s_rx, LOGII2S_INT_FAF);
+			logii2s_port_mask_int(&i2s_rx, LOGII2S_INT_FAF);
 
-		logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
+			logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
 
+			send_message("Finished recording.");
+    	}
 	}
 
     void Audio::enable_playback(void) {
-		playing = true;
+    	if(playing == false) {
+			playing = true;
 
-		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
+			logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
 
-		logii2s_port_unmask_int(&i2s_tx, LOGII2S_INT_FAE);
+			logii2s_port_unmask_int(&i2s_tx, LOGII2S_INT_FAE);
 
-		logii2s_port_enable_xfer(&i2s_tx);
+			logii2s_port_enable_xfer(&i2s_tx);
 
+			send_message("Playing...");
+    	}
     }
 
     void Audio::disable_playback(void) {
-		playing = false;
+    	if(playing == true) {
+			playing = false;
 
-		logii2s_port_disable_xfer(&i2s_tx);
+			logii2s_port_disable_xfer(&i2s_tx);
 
-		logii2s_port_mask_int(&i2s_tx, LOGII2S_INT_FAE);
+			logii2s_port_mask_int(&i2s_tx, LOGII2S_INT_FAE);
 
-		logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
+			logii2s_port_clear_isr(&i2s_tx, LOGII2S_INT_ACK_ALL);
 
+			send_message("Finished playing.");
+    	}
 	}
 
     bool Audio::recording_enabled(void) {

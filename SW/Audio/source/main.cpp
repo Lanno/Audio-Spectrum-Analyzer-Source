@@ -74,19 +74,13 @@ int main(void) {
 
     		audio.enable_recording();
 
-    		send_message("Recording data...");
-
     	} else if(PLAYBACK) {
     		audio.disable_recording();
 
     		audio.enable_playback();
 
-    		send_message("Playing data...");
-
     	} else if(ANALYZE) {
     		audio.send_serial();
-
-    		send_message("Analyzing data...");
 
     	} else {
     		audio.disable_recording();
