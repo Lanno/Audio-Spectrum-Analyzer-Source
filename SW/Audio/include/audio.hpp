@@ -16,6 +16,8 @@
 #include <xscugic.h>
 #include <xil_exception.h>
 
+#include <json.hpp>
+
 #include <logii2s.h>
 #include <i2c.h>
 
@@ -27,7 +29,7 @@ namespace nluckett {
 
 		logii2s_port i2s_rx;
 
-		XGpio *mute_ptr;
+		XGpio mute_gpio;
 
 		XIicPs IIC;
 
@@ -35,7 +37,7 @@ namespace nluckett {
 
 		bool playing;
 
-		std::queue<u32> data;
+		std::deque<u32> data;
 
 	public:
 		Audio(void);
@@ -69,6 +71,8 @@ namespace nluckett {
 		logii2s_port get_tx(void);
 
 		logii2s_port get_rx(void);
+
+		void send_serial(void);
 
 	};
 

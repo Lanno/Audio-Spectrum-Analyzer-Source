@@ -5,7 +5,6 @@
  *      Author: noluc_000
  */
 
-#include <sstream>
 #include <cmath>
 
 #include <json.hpp>
@@ -40,20 +39,22 @@ namespace nluckett {
         recording = false;
         playing   = false;
 
-        std::stringstream payload;
-
-        payload << "LogiCore I2S Version: " << logii2s_port_get_version(&i2s_base)
-        		<< "Instance 0 Direction: " << logii2s_port_direction(&i2s_tx)
-				<< "Instance 1 Direction: " << logii2s_port_direction(&i2s_rx);
+//        std::stringstream payload;
+//
+//        payload << "LogiCore I2S Version: " << logii2s_port_get_version(&i2s_base)
+//        		<< "Instance 0 Direction: " << logii2s_port_direction(&i2s_tx)
+//				<< "Instance 1 Direction: " << logii2s_port_direction(&i2s_rx);
 
         //send_message(payload);
 
         // Initialize the mute
 
-        int status = XGpio_Initialize(mute_ptr, XPAR_MUTE_DEVICE_ID);
+        int status = XGpio_Initialize(&mute_gpio, XPAR_MUTE_DEVICE_ID);
 
         if(status != XST_SUCCESS)
         	throw_exception("The Mute GPIO could not be initialized.");
+
+        send_message("Mute GPIO initialized.");
 
         // I2C Stuff
 
@@ -115,11 +116,11 @@ namespace nluckett {
 	}
 
     void Audio::mute(void) {
-    	XGpio_DiscreteWrite(mute_ptr, 1, 0x00000000);
+    	XGpio_DiscreteWrite(&mute_gpio, 1, 0x00000000);
     }
 
     void Audio::unmute(void) {
-    	XGpio_DiscreteWrite(mute_ptr, 1, 0xFFFFFFFF);
+    	XGpio_DiscreteWrite(&mute_gpio, 1, 0xFFFFFFFF);
     }
 
     logii2s_port Audio::get_tx(void) {
@@ -135,7 +136,7 @@ namespace nluckett {
 			u32 sample = logii2s_port_read_fifo_word(&i2s_rx);
 
 			if(data.size() < (SAMPLE_RATE * LONGEST_RECORD)) {
-				data.push(sample);
+				data.push_back(sample);
 			}
     	}
 
@@ -149,7 +150,7 @@ namespace nluckett {
 			if(data.size() > 0) {
 				u32 sample = data.front();
 
-				data.pop();
+				data.pop_front();
 
 				logii2s_port_write_fifo_word(&i2s_tx, sample);
 
@@ -198,6 +199,10 @@ namespace nluckett {
 
     u32 Audio::size(void) {
     	return data.size();
+    }
+
+    void Audio::send_serial(void) {
+    	send_data(data);
     }
 
 	void audio_handler(void *audio_instance) {
