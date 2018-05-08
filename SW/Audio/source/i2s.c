@@ -6,6 +6,7 @@
  
 #include <i2c.h>
 #include <sleep.h>
+#include <serial_comm.hpp>
 
 /* ---------------------------------------------------------------------------- *
  * 									IicConfig()									*
@@ -37,12 +38,10 @@ unsigned char IicConfig(XIicPs *Iic, unsigned int DeviceIdPS)
 	 */
 	Status = XIicPs_SelfTest(Iic);
 	if (Status != XST_SUCCESS) {
-		xil_printf("IIC FAILED \r\n");
+		send_message("IIC FAILED");
 		return XST_FAILURE;
-
 	}
-	xil_printf("IIC Passed\r\n");
-
+	send_message("IIC PASSED");
 
 	//Set the IIC serial clock rate.
 	Status = XIicPs_SetSClk(Iic, IIC_SCLK_RATE);

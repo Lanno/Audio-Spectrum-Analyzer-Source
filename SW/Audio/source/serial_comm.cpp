@@ -2,7 +2,7 @@
 
 void send_message(std::string payload) {
 	nlohmann::json message = {
-		"message", payload
+		{"message", payload}
 	};
 
 	std::cout << message << std::endl;
@@ -10,8 +10,8 @@ void send_message(std::string payload) {
 
 void throw_exception(std::string payload) {
 	nlohmann::json exception = {
-		"exception", payload
+		{"exception", payload}
 	};
 
-	throw std::runtime_error(exception);
+	throw std::runtime_error(payload);
 }

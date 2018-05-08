@@ -1742,7 +1742,7 @@ template<typename WideStringType>
 class wide_string_input_adapter : public input_adapter_protocol
 {
   public:
-    wide_string_input_adapter(const WideStringType& w) : str(w) {}
+    wide_string_input_adapter(const WideStringType& w) : wide_string(w) {}
 
     std::char_traits<char>::int_type get_character() noexcept override
     {
@@ -1785,7 +1785,7 @@ class wide_string_input_adapter : public input_adapter_protocol
     {
         utf8_bytes_index = 0;
 
-        if (current_wchar == str.size())
+        if (current_wchar == wide_string.size())
         {
             utf8_bytes[0] = std::char_traits<char>::eof();
             utf8_bytes_filled = 1;
@@ -1793,7 +1793,7 @@ class wide_string_input_adapter : public input_adapter_protocol
         else
         {
             // get the current character
-            const int wc = static_cast<int>(str[current_wchar++]);
+            const int wc = static_cast<int>(wide_string[current_wchar++]);
 
             // UTF-16 to UTF-8 encoding
             if (wc < 0x80)
@@ -1816,9 +1816,9 @@ class wide_string_input_adapter : public input_adapter_protocol
             }
             else
             {
-                if (current_wchar < str.size())
+                if (current_wchar < wide_string.size())
                 {
-                    const int wc2 = static_cast<int>(str[current_wchar++]);
+                    const int wc2 = static_cast<int>(wide_string[current_wchar++]);
                     const int charcode = 0x10000 + (((wc & 0x3FF) << 10) | (wc2 & 0x3FF));
                     utf8_bytes[0] = 0xf0 | (charcode >> 18);
                     utf8_bytes[1] = 0x80 | ((charcode >> 12) & 0x3F);
@@ -1841,7 +1841,7 @@ class wide_string_input_adapter : public input_adapter_protocol
     {
         utf8_bytes_index = 0;
 
-        if (current_wchar == str.size())
+        if (current_wchar == wide_string.size())
         {
             utf8_bytes[0] = std::char_traits<char>::eof();
             utf8_bytes_filled = 1;
@@ -1849,7 +1849,7 @@ class wide_string_input_adapter : public input_adapter_protocol
         else
         {
             // get the current character
-            const int wc = static_cast<int>(str[current_wchar++]);
+            const int wc = static_cast<int>(wide_string[current_wchar++]);
 
             // UTF-32 to UTF-8 encoding
             if (wc < 0x80)
@@ -1889,7 +1889,7 @@ class wide_string_input_adapter : public input_adapter_protocol
 
   private:
     /// the wstring to process
-    const WideStringType& str;
+    const WideStringType& wide_string;
 
     /// index of the current wchar in str
     std::size_t current_wchar = 0;
