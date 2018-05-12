@@ -37,6 +37,8 @@ namespace nluckett {
 
 		bool playing;
 
+		bool new_data;
+
 		std::deque<u32> data;
 
 	public:

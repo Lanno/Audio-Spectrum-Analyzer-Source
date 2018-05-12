@@ -19,7 +19,6 @@ namespace nluckett {
     Audio::Audio(void)
     : data()
     {
-
         // Initialize the I2S structures.
 
         i2s_base.base       = XPAR_LOGII2S_BASEADDR;
@@ -38,14 +37,6 @@ namespace nluckett {
 
         recording = false;
         playing   = false;
-
-//        std::stringstream payload;
-//
-//        payload << "LogiCore I2S Version: " << logii2s_port_get_version(&i2s_base)
-//        		<< "Instance 0 Direction: " << logii2s_port_direction(&i2s_tx)
-//				<< "Instance 1 Direction: " << logii2s_port_direction(&i2s_rx);
-
-        //send_message(payload);
 
         // Initialize the mute
 
@@ -152,6 +143,8 @@ namespace nluckett {
 			}
     	}
 
+    	new_data = true;
+
     	// Clearing the interrupt after processing is critical.
 
     	logii2s_port_clear_isr(&i2s_rx, LOGII2S_INT_ACK_ALL);
@@ -214,7 +207,17 @@ namespace nluckett {
     }
 
     void Audio::send_serial(void) {
-    	send_data(data);
+    	if(new_data == true) {
+    		std::deque<u32> decimated;
+
+    		for(u32 idx = 0; idx < data.size(); idx += 10){
+    			decimated.push_back(data[idx]);
+    		}
+
+			send_data(decimated);
+
+			new_data = false;
+		}
     }
 
 	void audio_handler(void *audio_instance) {

@@ -4,38 +4,7 @@
 		<link href="{{'index.css' | staticfile}}" rel="stylesheet" type="text/css">
 		<script language="javascript" type="text/javascript" src="{{'flot/jquery.js' | staticfile}}"></script>
 		<script language="javascript" type="text/javascript" src="{{'flot/jquery.flot.js' | staticfile}}"></script>
-		<script type="text/javascript">
-			$(function() {
-				var d1 = [];
-				
-				for (var i = 0; i < 14; i += 0.5) {
-					d1.push([i, Math.sin(i)]);
-				}
-
-				var d2 = [[0, 3], [4, 8], [8, 5], [9, 13]];
-
-				// A null signifies separate line segments
-
-				var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
-
-				$.plot("#time_domain", [ d1, d2, d3 ]);
-				
-				$.plot("#freq_domain", [ d1, d2, d3 ]);
-				
-				setInterval(function() {
-					var item = Queue_Wrapper.message();
-					
-					if(item !== "empty") {
-						var elem = $("<li></li>")
-							.append(item);
-					
-						$("#messages").append(elem);
-					}
-					
-				}, 1000);
-			});
-
-		</script>
+		<script language="javascript" type="text/javascript" src="{{'main.js' | staticfile}}"></script>
 	</head>
 	
 	<body>
