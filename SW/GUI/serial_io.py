@@ -1,8 +1,10 @@
 from threading import Thread
 from Queue import Empty
+from struct import unpack
 from json import loads, dumps
 
 from serial import Serial as pyserial
+from numpy.fft import fft
 import htmlPy
 
 class Queue_Wrapper(htmlPy.Object):
@@ -19,9 +21,9 @@ class Queue_Wrapper(htmlPy.Object):
     def message(self):
         try:
             result = self._message_queue.get(False)
-            
+
             print type(result), len(result)
-            
+
             return result
 
         except Empty:
@@ -30,10 +32,33 @@ class Queue_Wrapper(htmlPy.Object):
     @htmlPy.Slot(result=str)
     def data(self):
         try:
-            result = self._data_queue.get(False)
-        
+            data = self._data_queue.get(False)
+
+            left_data  = [];
+
+            right_data = [];
+
+            for point in data:
+                hex_string = hex(point).strip("0x").strip("L").zfill(8).decode("hex")
+                
+                left, right = unpack("hh", hex_string)
+
+                left  = left  / 2.0**16
+
+                right = right / 2.0**16
+
+                left_data.append(left)
+
+                right_data.append(right)
+
+            left_fft  = [abs(point) for point in fft(left_data)][0:len(left_data)/2]
+
+            right_fft = [abs(point) for point in fft(right_data)][0:len(right_data)/2]
+
+            result = [left_data, right_data, left_fft, right_fft]
+
             print type(result), len(result)
-        
+
             return dumps(result)
 
         except Empty:
@@ -72,7 +97,7 @@ class Read_Thread(Thread):
 
     def run(self):
         buffer = ""
-    
+
         while True:
             payload = self._serial.read()
 
@@ -110,21 +135,21 @@ class Read_Thread(Thread):
 
                     except Exception as error:
                         pass
-                        
+
                         buffer += message
-                        
+
                         try:
                             item = loads(buffer)
 
                             with open("json.txt", "a") as handle:
                                 handle.write(buffer + "\n")
-                                
+
                         except Exception as error:
                             pass
-                             
+
                         else:
                             buffer = ""
-                        
+
                             try:
                                 if item.keys()[0] == "message":
                                     self._message_queue.put(item["message"])
@@ -148,7 +173,7 @@ class Read_Thread(Thread):
 
                             elif item.keys()[0] == "error":
                                 self._error_queue.put(item["error"])
-                                
+
                         except AttributeError:
                             pass
 
